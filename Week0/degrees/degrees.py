@@ -1,6 +1,5 @@
 import csv
 import sys
-#test
 
 from util import Node, StackFrontier, QueueFrontier
 
@@ -93,8 +92,18 @@ def shortest_path(source, target):
     If no possible path, returns None.
     """
 
-    # TODO
-    raise NotImplementedError
+    #keep track
+    self.num_explored = 0
+
+    #initialize frontier
+    start = Node(state=source, parent=None, action=None)
+    frontier = QueueFrontier()
+    frontier.add(start)
+
+    #initialize explored set
+    self.explored = set()
+
+    
 
 
 def person_id_for_name(name):
