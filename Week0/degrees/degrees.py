@@ -85,25 +85,25 @@ def main():
 
 
 def shortest_path(source, target):
-    """
-    Returns the shortest list of (movie_id, person_id) pairs
-    that connect the source to the target.
+    frontier = QueueFrontier()  # Initialize the frontier as a queue
+    frontier.add((source, []))  # Add the source with an empty path
+    visited = set()  # Initialize a set to keep track of visited nodes
 
-    If no possible path, returns None.
-    """
+    while not frontier.empty():
+        person, path = frontier.remove()  # Dequeue a person and its path
+        if person == target:
+            return path  # If we reach the target, return the path
 
-    #keep track
-    self.num_explored = 0
+        if person not in visited:
+            visited.add(person)
+            neighbors = neighbors_for_person(person)
+            for movie_id, neighbor_id in neighbors:
+                if neighbor_id not in visited:
+                    frontier.add((neighbor_id, path + [(movie_id, neighbor_id)]))
 
-    #initialize frontier
-    start = Node(state=source, parent=None, action=None)
-    frontier = QueueFrontier()
-    frontier.add(start)
+    return None  # If no path is found, return None
 
-    #initialize explored set
-    self.explored = set()
 
-    
 
 
 def person_id_for_name(name):
