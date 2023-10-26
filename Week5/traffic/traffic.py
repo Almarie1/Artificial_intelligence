@@ -1,11 +1,9 @@
-import os
-import sys
-
 import cv2
 import numpy as np
+import os
+import sys
 import tensorflow as tf
-from keras.layers import *
-from keras.models import *
+
 from sklearn.model_selection import train_test_split
 
 EPOCHS = 10
@@ -37,7 +35,7 @@ def main():
     model.fit(x_train, y_train, epochs=EPOCHS)
 
     # Evaluate neural network performance
-    model.evaluate(x_test, y_test, verbose=2)
+    model.evaluate(x_test,  y_test, verbose=2)
 
     # Save model to file
     if len(sys.argv) == 3:
@@ -60,21 +58,15 @@ def load_data(data_dir):
     be a list of integer labels, representing the categories for each of the
     corresponding `images`.
     """
-    data = []
-
-    for dirpath, _, filenames in os.walk(data_dir):
-        for filename in filenames:
-            image = cv2.imread(os.path.join(dirpath, filename))
-            resized = cv2.resize(image, (IMG_WIDTH, IMG_HEIGHT))
-
-            label = int(os.path.basename(dirpath))
-
-            data.append({"image": resized, "label": label})
-
-    images = [row["image"] for row in data]
-    labels = [row["label"] for row in data]
-
-    return images, labels
+    images = []
+    labels = []
+    for i in range(NUM_CATEGORIES):
+        for filename in os.listdir(os.path.join(data_dir, str(i))):
+            img = cv2.imread(os.path.join(data_dir, str(i), filename))
+            resize = cv2.resize(img, (IMG_WIDTH, IMG_HEIGHT))
+            images.append(resize)
+            labels.append(i)
+    return (images, labels)
 
 
 def get_model():
@@ -83,34 +75,34 @@ def get_model():
     `input_shape` of the first layer is `(IMG_WIDTH, IMG_HEIGHT, 3)`.
     The output layer should have `NUM_CATEGORIES` units, one for each category.
     """
-    # Create  a convolutional neural network
-    model = Sequential(
-        [
-            # Convolutional layer 1
-            Conv2D(
-                200, (7, 7), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
-            ),
-            # Max-pooling layer 1
-            MaxPooling2D(pool_size=(2, 2)),
-            # Convolutional layer 2
-            Conv2D(250, (4, 4), activation="relu"),
-            # Max-pooling layer 2
-            MaxPooling2D(pool_size=(2, 2)),
-            # Flatten units
-            Flatten(),
-            # Add a hidden layer with dropout
-            Dense(400, activation="relu"),
-            # Add a 50% dropout
-            Dropout(0.5),
-            # Add an output layer with output units for all labels
-            Dense(NUM_CATEGORIES, activation="softmax"),
-        ]
-    )
+    model = tf.keras.models.Sequential([
+        # Convolutional layer
+        tf.keras.layers.Conv2D(
+            32, (3, 3), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
+        ),
 
-    model.summary()
+        # Max-pooling layer
+        tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+
+        # Flatten units
+        tf.keras.layers.Flatten(),
+
+        # Hidden layer
+        tf.keras.layers.Dense(128, activation="relu"),
+        tf.keras.layers.Dense(128, activation="relu"),
+        tf.keras.layers.Dense(128, activation="relu"),
+        tf.keras.layers.Dense(128, activation="relu"),
+
+        # Dropout layer
+        tf.keras.layers.Dropout(0.5),
+
+        tf.keras.layers.Dense(NUM_CATEGORIES, activation="softmax")
+    ])
 
     model.compile(
-        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
+        optimizer="adam",
+        loss="categorical_crossentropy",
+        metrics=["accuracy"]
     )
 
     return model
